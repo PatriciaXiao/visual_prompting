@@ -50,7 +50,7 @@ def parse_option():
     parser.add_argument('--patience', type=int, default=1000)
 
     # model
-    parser.add_argument('--model', type=str, default=None,
+    parser.add_argument('--model', type=str, default="bit_m_rn50", # None
                         choices=['rn50', 'instagram_resnext101_32x8d', 'bit_m_rn50'],
                         help='choose pre-trained model')
     parser.add_argument('--method', type=str, default='padding',
@@ -130,6 +130,8 @@ def main():
         model = bit_models.KNOWN_MODELS['BiT-M-R50x1'](zero_head=True)
         model.load_from(np.load('BiT-M-R50x1.npz'))
         model = model.to(device)
+    else:
+        print("ERROR: model name {} unrecognized".format(args.model))
 
     model.eval()
 
