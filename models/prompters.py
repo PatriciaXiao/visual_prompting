@@ -4,19 +4,24 @@ import numpy as np
 
 
 class PadPrompter(nn.Module):
-    def __init__(self, args):
+    def __init__(self, args, dim=1): # 3
         super(PadPrompter, self).__init__()
         pad_size = args.prompt_size
         image_size = args.image_size
 
+        self.dim = dim
+
         self.base_size = image_size - pad_size*2
-        self.pad_up = nn.Parameter(torch.randn([1, 3, pad_size, image_size]))
-        self.pad_down = nn.Parameter(torch.randn([1, 3, pad_size, image_size]))
-        self.pad_left = nn.Parameter(torch.randn([1, 3, image_size - pad_size*2, pad_size]))
-        self.pad_right = nn.Parameter(torch.randn([1, 3, image_size - pad_size*2, pad_size]))
+        self.pad_up = nn.Parameter(torch.randn([1, dim, pad_size, image_size]))
+        self.pad_down = nn.Parameter(torch.randn([1, dim, pad_size, image_size]))
+        self.pad_left = nn.Parameter(torch.randn([1, dim, image_size - pad_size*2, pad_size]))
+        self.pad_right = nn.Parameter(torch.randn([1, dim, image_size - pad_size*2, pad_size]))
 
     def forward(self, x):
-        base = torch.zeros(1, 3, self.base_size, self.base_size).cuda()
+        if torch.cuda.is_available():
+            base = torch.zeros(1, self.dim, self.base_size, self.base_size).cuda()
+        else:
+            base = torch.zeros(1, self.dim, self.base_size, self.base_size)
         prompt = torch.cat([self.pad_left, base, self.pad_right], dim=3)
         prompt = torch.cat([self.pad_up, prompt, self.pad_down], dim=2)
         prompt = torch.cat(x.size(0) * [prompt])

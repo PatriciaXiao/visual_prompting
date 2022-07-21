@@ -16,7 +16,7 @@ import torch.backends.cudnn as cudnn
 import torchvision.models as models
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
-from torchvision.datasets import CIFAR100
+from torchvision.datasets import CIFAR100, MNIST
 
 from models import prompters
 from utils import accuracy, AverageMeter, ProgressMeter, save_checkpoint, cosine_lr, refine_classname
@@ -31,7 +31,7 @@ def parse_option():
                         help='save frequency')
     parser.add_argument('--batch_size', type=int, default=128,
                         help='batch_size')
-    parser.add_argument('--num_workers', type=int, default=16,
+    parser.add_argument('--num_workers', type=int, default=4, #16,
                         help='num of workers to use')
     parser.add_argument('--epochs', type=int, default=1000,
                         help='number of training epoch5s')
@@ -159,23 +159,37 @@ def main():
             print("=> no checkpoint found at '{}'".format(args.resume))
 
     # create data
-    preprocess = transforms.Compose([
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                             std=[0.229, 0.224, 0.225])
-    ])
 
-    train_dataset = CIFAR100(args.root, transform=preprocess,
-                             download=True, train=True)
+    if args.dataset == "cifar100":
+        preprocess = transforms.Compose([
+            transforms.Resize(256),
+            transforms.CenterCrop(224),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                 std=[0.229, 0.224, 0.225])
+        ])
 
-    val_dataset = CIFAR100(args.root, transform=preprocess,
-                           download=True, train=False)
+        train_dataset = CIFAR100(args.root, transform=preprocess,
+                                 download=True, train=True)
+
+        val_dataset = CIFAR100(args.root, transform=preprocess,
+                               download=True, train=False)
+
+        
+    elif args.dataset == "mnist":
+        preprocess = transforms.Compose([
+            transforms.ToTensor()
+        ])
+        train_dataset = MNIST(args.root, transform=preprocess,
+                                 download=True, train=True)
+
+        val_dataset = MNIST(args.root, transform=preprocess,
+                               download=True, train=False)
+
 
     train_loader = DataLoader(train_dataset,
-                              batch_size=args.batch_size, pin_memory=True,
-                              num_workers=args.num_workers, shuffle=True)
+                                  batch_size=args.batch_size, pin_memory=True,
+                                  num_workers=args.num_workers, shuffle=True)
 
     val_loader = DataLoader(val_dataset,
                             batch_size=args.batch_size, pin_memory=True,
