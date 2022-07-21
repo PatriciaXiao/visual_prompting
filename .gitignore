@@ -128,3 +128,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 data/*
+big_transfer/
+big_transfer/*
