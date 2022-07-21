@@ -1,5 +1,8 @@
 from __future__ import print_function
 
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
+
 import argparse
 import os
 from tqdm import tqdm
