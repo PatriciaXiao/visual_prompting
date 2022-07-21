@@ -16,7 +16,7 @@ import torch.backends.cudnn as cudnn
 import torchvision.models as models
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
-from torchvision.datasets import CIFAR100, MNIST
+from torchvision.datasets import CIFAR100, MNIST, CIFAR10
 
 from models import prompters
 from utils import accuracy, AverageMeter, ProgressMeter, save_checkpoint, cosine_lr, refine_classname
@@ -31,7 +31,7 @@ def parse_option():
                         help='save frequency')
     parser.add_argument('--batch_size', type=int, default=128,
                         help='batch_size')
-    parser.add_argument('--num_workers', type=int, default=4, #16,
+    parser.add_argument('--num_workers', type=int, default=1, #16,
                         help='num of workers to use')
     parser.add_argument('--epochs', type=int, default=1000,
                         help='number of training epoch5s')
@@ -56,7 +56,7 @@ def parse_option():
     parser.add_argument('--method', type=str, default='padding',
                         choices=['padding', 'random_patch', 'fixed_patch'],
                         help='choose visual prompting method')
-    parser.add_argument('--prompt_size', type=int, default=30,
+    parser.add_argument('--prompt_size', type=int, default=30, # 30 for cifar # (for mnist: < 15)
                         help='size for visual prompts')
 
     # dataset
@@ -64,7 +64,7 @@ def parse_option():
                         help='dataset')
     parser.add_argument('--dataset', type=str, default='cifar100',
                         help='dataset')
-    parser.add_argument('--image_size', type=int, default=224,
+    parser.add_argument('--image_size', type=int, default=224,# 334 for cifar, 28 for mnist (TODO: make it run through)
                         help='image size')
 
     # other
@@ -173,6 +173,21 @@ def main():
                                  download=True, train=True)
 
         val_dataset = CIFAR100(args.root, transform=preprocess,
+                               download=True, train=False)
+
+    elif args.dataset == "cifar10":
+        preprocess = transforms.Compose([
+            transforms.Resize(256),
+            transforms.CenterCrop(224),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                 std=[0.229, 0.224, 0.225])
+        ])
+
+        train_dataset = CIFAR10(args.root, transform=preprocess,
+                                 download=True, train=True)
+
+        val_dataset = CIFAR10(args.root, transform=preprocess,
                                download=True, train=False)
 
         

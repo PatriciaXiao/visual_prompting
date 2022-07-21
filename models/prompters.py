@@ -26,6 +26,9 @@ class PadPrompter(nn.Module):
         prompt = torch.cat([self.pad_up, prompt, self.pad_down], dim=2)
         prompt = torch.cat(x.size(0) * [prompt])
 
+        #print(x.shape, prompt.shape)
+        #exit(0)
+
         return x + prompt
 
 
