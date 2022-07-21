@@ -302,10 +302,14 @@ def train(indices, train_loader, model, prompter, optimizer, scheduler, criterio
         prompted_images = prompter(images)
         output = model(prompted_images)
         if indices:
-            print(indices)
+            print(indices) 
             print(output.shape)
             print(output[:,indices].shape)
             exit(0)
+            """
+            torch.Size([128, 21843])
+            torch.Size([128, 10])
+            """
             output = output[:,indices]
         loss = criterion(output, target)
 
